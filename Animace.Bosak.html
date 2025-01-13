@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .nadpis {
+      position: absolute;
+      top: 5%;
+      left: 40%;
+      padding: 10px 20px;
+      font-size: 40px;
+      border-radius: 10px;
+      z-index: 2;
+    }
+
+    .cesta {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      background: gray;
+      z-index: 1;
+    }
+
+    .line {
+      position: absolute;
+      width: 100%;
+      height: 8px;
+      background: white;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+    }
+
+    .auto {
+      position: absolute;
+      font-size: 50px;
+      top: 50%;
+      left: 5%;
+      transform: translateY(-50%);
+      animation: drive 10s linear forwards, bounce 0.5s infinite alternate;
+      animation-play-state: paused;
+    }
+
+    .strom, .cil {
+      position: absolute;
+      font-size: 50px;
+    }
+
+    .strom-start {
+      top: 15%;
+      left: 15%;
+    }
+
+    .strom-middle {
+      top: 50%;
+      left: 40%;
+    }
+
+    .strom-end {
+      top: 5%;
+      left: 75%;
+    }
+
+    .cil {
+      top: 50%;
+      left: 95%;
+      transform: translateY(-50%);
+    }
+
+    .explosion {
+      position: absolute;
+      font-size: 200px;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: none;
+      z-index: 1000;
+      animation: flash 1s infinite;
+    }
+
+    .znovu {
+      position: absolute;
+      font-size: 100px;
+      color: red;
+      top: 120%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: none;
+      z-index: 1001;
+      animation: flash 1s infinite;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      z-index: 0;
+    }
+
+    .instrukce {
+      margin-top: 20px;
+      font-size: 16px;
+      text-align: center;
+      color: white;
+      background: black;
+      padding: 10px;
+      border-radius: 10px;
+      z-index: 1;
+      position: absolute;
+      bottom: 20px; 
+    }
+
+    @keyframes drive {
+      from {
+        left: 5%;
+      }
+      to {
+        left: 95%;
+      }
+    }
+
+    @keyframes bounce {
+      from {
+        transform: translateY(-50%);
+      }
+      to {
+        transform: translateY(-60%);
+      }
+    }
+
+    @keyframes flash {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="nadpis">Autodrom Třebešín</div>
+  <div class="cesta">
+    <div class="line"></div>
+    <div class="auto">🚗</div>
+    <div class="strom strom-start">🌳</div>
+    <div class="strom strom-middle">🌳</div>
+    <div class="strom strom-end">🌳</div>
+    <div class="cil">🏁</div>
+    <div class="explosion">💥</div>
+    <div class="znovu">Zkus to znovu</div>
+  </div>
+  <button onclick="startAnimation()">Jedeme!</button>
+  <div class="instrukce">
+    <p>Naviguj auto šipkami</p>
+    <p>Pozor na stromy!</p>
+  </div>
+
+  <script>
+    const auto = document.querySelector('.auto');
+    const explosion = document.querySelector('.explosion');
+    const tryAgainText = document.querySelector('.znovu');
+    const stroms = document.querySelectorAll('.strom');
+    let autoTop = parseFloat(getComputedStyle(auto).top);
+    let collisionCheck;
+
+    function startAnimation() {
+      auto.style.animationPlayState = 'running';
+      document.addEventListener('keydown', moveauto);
+      collisionCheck = setInterval(checkCollisions, 50);
+    }
+
+    function moveauto(event) {
+      if (event.key === 'ArrowUp' && autoTop > 0) {
+        autoTop -= 10;
+        auto.style.top = `${autoTop}px`;
+      } else if (event.key === 'ArrowDown' && autoTop < 150) {
+        autoTop += 10;
+        auto.style.top = `${autoTop}px`;
+      }
+    }
+
+    function checkCollisions() {
+      const autoBounds = auto.getBoundingClientRect();
+
+      stroms.forEach(strom => {
+        const stromBounds = strom.getBoundingClientRect();
+        if (
+          autoBounds.right > stromBounds.left &&
+          autoBounds.left < stromBounds.right &&
+          autoBounds.bottom > stromBounds.top &&
+          autoBounds.top < stromBounds.bottom
+        ) {
+          handleCollision();
+        }
+      });
+    }
+
+    function handleCollision() {
+      clearInterval(collisionCheck);
+      explosion.style.display = 'block';
+      tryAgainText.style.display = 'block';
+      auto.style.display = 'none';
+      document.removeEventListener('keydown', moveauto);
+    }
+  </script>
+</body>
+</html>
